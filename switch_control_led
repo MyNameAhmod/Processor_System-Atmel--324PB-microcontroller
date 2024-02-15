@@ -1,0 +1,71 @@
+; setup stack pointer
+ldi r16, high(RAMEND)
+out SPH,r16
+ldi r16, low(RAMEND)
+out SPL, r16
+;set up ports
+ldi r16, 0xff
+ldi r17, 0x00
+out ddrb, r17; make portb a input
+out portb, r16; activate pull up resistor
+out ddra, r16; set porta as a output
+out porta, r16; activate pull up resistor porta 
+;forever loop
+here:
+	sbis pinb,0 ; skip if low
+	call odd
+	sbic pinb,0; skip if high
+	call even
+rjmp here
+; Turn on the even number of led
+EVEN:
+	sbi pina,0
+	call DELAY
+	sbi pina,2
+	call DELAY
+	sbi pina,4
+	call DELAY
+	sbi pina,6
+	call DELAY
+	cbi pina,0
+	call DELAY
+	cbi pina,2
+	call DELAY
+	cbi pina,4
+	call DELAY
+	cbi pina,6
+	call DELAY
+	ret
+; turn on the odd number of led
+ODD:
+	sbi pina,1
+	call DELAY
+	sbi pina,3
+	call DELAY
+	sbi pina,5
+	call DELAY
+	sbi pina,7
+	call DELAY
+	cbi pina,1
+	call DELAY
+	cbi pina,3
+	call DELAY
+	cbi pina,5
+	call DELAY
+	cbi pina,7
+	call DELAY
+	ret
+; delay one half a second
+DELAY:
+ldi r20,32
+L1: LDI R21, 200
+L2: LDI R22, 250
+L3: NOP
+NOP
+DEC R22
+BRNE L3
+DEC R21
+BRNE L2
+DEC R20
+BRNE L1
+ret
