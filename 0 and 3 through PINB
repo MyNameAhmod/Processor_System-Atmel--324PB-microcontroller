@@ -1,0 +1,58 @@
+; setup stack pointer
+ldi r16, high(RAMEND)
+out SPH,r16
+ldi r16, low(RAMEND)
+out SPL, r16
+;set up ports
+ldi r16, 0xff
+ldi r17, 0x00
+out ddrb, r17; make portb a input
+out portb, r16; activate pull up resistor
+ldi r20,$00
+ldi r16,$ff ; hex 0xff
+ldi r17,$01
+ldi r18,$02
+ldi r19,$03
+;forever loop
+; if switch one is close it 1
+; if switch two is close it 2
+; if both switches are open it 0
+; if both switches are close it 3
+
+here:
+	sts 0x200, r20
+	sts 0x201, r20
+	sts 0x202, r20
+	sts 0x203, r20
+	sbis pinb,0 ; skip if low see if the first swtich is open 
+	call switch0
+	sbic pinb,0; skip if high
+	call switch1
+	rjmp here
+switch0:
+	sbis pinb,1; skip fi low see if the second switch is open 
+	sts 0x203, r19
+	sbic pinb,1; skip of high 
+	sts 0x201, r17
+	ret
+switch1:
+	sbis pinb,1; skip fi low see if the second switch is open 
+	sts 0x201, r18
+	sbic pinb,1; skip of high 
+	sts 0x200, r16
+	ret
+
+; delay one half a second
+DELAY:
+ldi r20,32
+L1: LDI R21, 200
+L2: LDI R22, 250
+L3: NOP
+NOP
+DEC R22
+BRNE L3
+DEC R21
+BRNE L2
+DEC R20
+BRNE L1
+ret
